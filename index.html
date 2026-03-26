@@ -339,6 +339,10 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--g50);color:var(--g90
         <span class="nav-label" id="label-groupB">그룹 B</span>
         <button class="nav-gear" onclick="openRename('groupB',event)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></button>
       </div>
+      <div class="nav-item" id="nav-schedule" onclick="goTo('schedule')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        <span class="nav-label">전체 일정</span>
+      </div>
       <div class="nav-item" id="nav-design" onclick="goTo('design')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         <span class="nav-label" id="label-design">설계변경</span>
@@ -356,8 +360,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--g50);color:var(--g90
         회원 관리
         <span id="members-badge" style="display:none;background:#E53E3E;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:auto;"></span>
       </div>
-      <div class="util-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg> 설정</div>
-      <div class="util-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg> 도움말</div>
       <div class="util-item" onclick="doLogout()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg> 로그아웃</div>
     </div>
   </aside>
@@ -399,7 +401,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--g50);color:var(--g90
         <div class="dash-layout">
           <div id="dash-groups"></div>
           <div>
-            <div class="side-card"><div class="side-title">📅 다가오는 일정</div><div class="sched-item"><div class="sched-date">2026. 06. 15</div><div class="sched-name">AI 수요 예측 아키텍처 설계 완료</div><div class="sched-d">D-3</div></div><div class="sched-item"><div class="sched-date">2026. 06. 20</div><div class="sched-name">글로벌 물류 대시보드 1차 구현</div><div class="sched-d">D-8</div></div><span class="lnk-more">전체 일정 보기</span></div>
+            <div class="side-card">
+              <div class="side-title">📅 다가오는 일정</div>
+              <div id="dash-schedule-list"><div style="font-size:12px;color:var(--g400);text-align:center;padding:8px 0;">불러오는 중...</div></div>
+              <span class="lnk-more" onclick="goTo('schedule')">전체 일정 보기</span>
+            </div>
             <div class="side-card">
               <div class="side-title">👥 가입된 회원</div>
               <div id="dash-members-list"><div style="font-size:12px;color:var(--g400);text-align:center;padding:12px 0;">불러오는 중...</div></div>
@@ -480,6 +486,25 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--g50);color:var(--g90
               <div id="detail-members-list"></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <!-- 전체 일정 -->
+      <div id="view-schedule" class="view">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+          <div>
+            <div style="font-size:20px;font-weight:800;margin-bottom:4px;">📅 전체 일정</div>
+            <div style="font-size:13px;color:var(--g600);">모든 프로젝트의 타임라인 일정입니다.</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;">
+            <button onclick="calPrev()" style="width:34px;height:34px;border-radius:6px;border:1.5px solid var(--g300);background:#fff;cursor:pointer;font-size:16px;">‹</button>
+            <span id="cal-title" style="font-size:16px;font-weight:700;min-width:140px;text-align:center;"></span>
+            <button onclick="calNext()" style="width:34px;height:34px;border-radius:6px;border:1.5px solid var(--g300);background:#fff;cursor:pointer;font-size:16px;">›</button>
+            <button onclick="calToday()" class="btn-outline" style="height:34px;">오늘</button>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:10px;border:1px solid var(--g200);overflow:hidden;box-shadow:var(--sh1);">
+          <div id="cal-grid" style="display:grid;grid-template-columns:repeat(7,1fr);"></div>
         </div>
       </div>
 
@@ -689,7 +714,7 @@ function getNavOrderedGroups(){
   const order = [];
   document.querySelectorAll('.sb-nav .nav-item').forEach(item=>{
     const id = item.id;
-    if(id==='nav-dashboard'||id==='nav-design'||id==='nav-completed') return;
+    if(id==='nav-dashboard'||id==='nav-design'||id==='nav-completed'||id==='nav-schedule') return;
     if(id==='nav-groupA') order.push('groupA');
     else if(id==='nav-groupB') order.push('groupB');
     else if(id && id.startsWith('nav-grp-')) order.push(id.replace('nav-grp-',''));
@@ -1053,12 +1078,13 @@ function goTo(v){
   if(document.getElementById('pg-pending')) document.getElementById('pg-pending').classList.remove('active');
   if(v==='login'){$('pg-login').classList.add('active');return;}
   $('pg-app').classList.add('active');
-  ['view-dashboard','view-group','view-detail','view-design','view-members','view-completed'].forEach(id=>{const el=$(id);if(el)el.classList.remove('active');});
+  ['view-dashboard','view-group','view-detail','view-design','view-members','view-completed','view-schedule'].forEach(id=>{const el=$(id);if(el)el.classList.remove('active');});
   // 동적 그룹 뷰도 숨기기
   document.querySelectorAll('.view-dyngrp').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el=>el.classList.remove('active'));
   if(v==='dashboard'){$('view-dashboard').classList.add('active');$('nav-dashboard').classList.add('active');renderDashboard();}
   else if(v==='groupA'||v==='groupB'){curGrp=v;renderGrp(v);$('view-group').classList.add('active');$('nav-'+v).classList.add('active');}
+  else if(v==='schedule'){$('view-schedule').classList.add('active');$('nav-schedule').classList.add('active');renderCalendar();}
   else if(v==='completed'){$('view-completed').classList.add('active');$('nav-completed').classList.add('active');renderCompleted();}
   else if(v==='design'){$('view-design').classList.add('active');$('nav-design').classList.add('active');renderDc();}
   else if(v==='members'){$('view-members').classList.add('active');$('nav-members').classList.add('active');loadMembers();}
@@ -1097,6 +1123,7 @@ function renderDashboard(){
   startClock();
   renderDashGroups();
   loadDashMembers();
+  renderDashSchedule();
 }
 
 function renderDashGroups(){
@@ -1121,7 +1148,7 @@ function renderDashGroups(){
       const thumbSrc = p.image || KOAS_LOGO;
       return`<div class="proj-card" onclick="goToDetail('${pk}')" style="display:flex;overflow:hidden;padding:0;min-height:90px;">
         <div style="width:120px;flex-shrink:0;background:#fff;border-right:1px solid var(--g200);display:flex;align-items:center;justify-content:center;overflow:hidden;">
-          <img src="${thumbSrc}" style="width:100%;height:100%;object-fit:contain;padding:10px;">
+          <img src="${thumbSrc}" style="width:100%;height:100%;object-fit:contain;padding:10px;mix-blend-mode:multiply;">
         </div>
         <div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;justify-content:center;">
           <div class="proj-card-top"><span class="proj-name">${p.name}</span><span class="sb s-${p.status}" style="font-size:10px;">${p.statusLabel}</span></div>
@@ -1201,7 +1228,7 @@ function initNavDrag(){
 
   nav.addEventListener('dragstart', e=>{
     const item = e.target.closest('.nav-item');
-    if(!item || item.id==='nav-dashboard' || item.id==='nav-design' || item.id==='nav-completed') return e.preventDefault();
+    if(!item || item.id==='nav-dashboard' || item.id==='nav-design' || item.id==='nav-completed' || item.id==='nav-schedule') return e.preventDefault();
     dragEl = item;
     setTimeout(()=>item.classList.add('dragging'), 0);
   });
@@ -1410,7 +1437,7 @@ function renderGrp(gk){
     const tlH=p.tl.map(t=>`<div class="tl-step ${t.type}"><span class="tl-date">${t.date}</span><span class="tl-lbl">${t.label}</span><span class="tl-st">${t.status}</span></div>`).join('');
     const thumbSrc = p.image || KOAS_LOGO;
     const el=document.createElement('div');el.className='proj-card-lg';el.onclick=()=>goToDetail(pk);
-    el.innerHTML=`<div class="proj-thumb-default" style="background:#fff;"><img src="${thumbSrc}" style="width:100%;height:100%;object-fit:contain;padding:12px;"></div><div class="proj-body"><div class="proj-top2"><div class="proj-nm">${p.name}</div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><span class="sb s-${p.status}">${p.statusLabel}</span><button class="proj-del-btn" onclick="delProj('${pk}',event)">✕</button></div></div><div class="proj-ds">${p.desc}</div>${tlH?`<div class="tl">${tlH}</div>`:''}<div class="proj-footer"><div class="persons-info" style="display:flex;flex-wrap:wrap;gap:4px;">${names}</div><button class="btn-detail" onclick="goToDetail('${pk}');event.stopPropagation()">상세보기</button></div></div>`;
+    el.innerHTML=`<div class="proj-thumb-default" style="background:#fff;"><img src="${thumbSrc}" style="width:100%;height:100%;object-fit:contain;padding:12px;mix-blend-mode:multiply;"></div><div class="proj-body"><div class="proj-top2"><div class="proj-nm">${p.name}</div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><span class="sb s-${p.status}">${p.statusLabel}</span><button class="proj-del-btn" onclick="delProj('${pk}',event)">✕</button></div></div><div class="proj-ds">${p.desc}</div>${tlH?`<div class="tl">${tlH}</div>`:''}<div class="proj-footer"><div class="persons-info" style="display:flex;flex-wrap:wrap;gap:4px;">${names}</div><button class="btn-detail" onclick="goToDetail('${pk}');event.stopPropagation()">상세보기</button></div></div>`;
     listEl.appendChild(el);
   });
   renderDashGroups();
@@ -1421,7 +1448,7 @@ let curKey=null,em=false,bk=null;
 function goToDetail(k){
   const p=PROJ[k];if(!p)return;
   curKey=k;em=false;if(!BOARD[k])BOARD[k]=[];
-  ['view-dashboard','view-group','view-detail','view-design','view-members','view-completed'].forEach(id=>{const el=$(id);if(el)el.classList.remove('active');});
+  ['view-dashboard','view-group','view-detail','view-design','view-members','view-completed','view-schedule'].forEach(id=>{const el=$(id);if(el)el.classList.remove('active');});
   document.querySelectorAll('.view-dyngrp').forEach(el=>el.classList.remove('active'));
   $('pg-app').classList.add('active');
   $('view-detail').classList.add('active');
@@ -1613,7 +1640,7 @@ function renderCompleted(){
     const el=document.createElement('div');
     el.className='proj-card-lg';el.onclick=()=>goToDetail(pk);
     const thumbSrc2 = p.image || KOAS_LOGO;
-    el.innerHTML=`<div class="proj-thumb-default" style="background:#fff;"><img src="${thumbSrc2}" style="width:100%;height:100%;object-fit:contain;padding:12px;"></div><div class="proj-body"><div class="proj-top2"><div class="proj-nm">${p.name}</div><span class="sb s-completed">완료</span></div><div class="proj-ds">${p.desc}</div><div class="proj-footer"><div style="display:flex;flex-wrap:wrap;gap:4px;">${names}</div><button class="btn-detail" onclick="goToDetail('${pk}');event.stopPropagation()">상세보기</button></div></div>`;
+    el.innerHTML=`<div class="proj-thumb-default" style="background:#fff;"><img src="${thumbSrc2}" style="width:100%;height:100%;object-fit:contain;padding:12px;mix-blend-mode:multiply;"></div><div class="proj-body"><div class="proj-top2"><div class="proj-nm">${p.name}</div><span class="sb s-completed">완료</span></div><div class="proj-ds">${p.desc}</div><div class="proj-footer"><div style="display:flex;flex-wrap:wrap;gap:4px;">${names}</div><button class="btn-detail" onclick="goToDetail('${pk}');event.stopPropagation()">상세보기</button></div></div>`;
     con.appendChild(el);
   });
 }
@@ -1715,8 +1742,115 @@ function savePost(i){const t=$('et-'+i).value.trim();if(!t){alert('내용을 입
 function delPost(i){if(!confirm('이 게시글을 삭제하시겠습니까?'))return;BOARD[curKey].splice(i,1);saveAppData();renderBoard();}
 function viewImg(s){const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:2000;display:flex;align-items:center;justify-content:center;cursor:zoom-out;';ov.onclick=()=>ov.remove();const img=document.createElement('img');img.src=s;img.style.cssText='max-width:90vw;max-height:90vh;border-radius:8px;';ov.appendChild(img);document.body.appendChild(ov);}
 
-// 설계변경
-const DC_ST=['완료','코드예정','기존활용','코드','제작중','재협의중','취소','보류','작업중단','긴급'];
+// ── 전체 일정 달력 ──
+let calYear = new Date().getFullYear();
+let calMonth = new Date().getMonth();
+
+function getAllSchedules(){
+  const events = [];
+  Object.entries(PROJ).forEach(([pk, p])=>{
+    (p.tl||[]).forEach(t=>{
+      if(!t.date) return;
+      const d = new Date(t.date);
+      if(isNaN(d)) return;
+      events.push({ date: d, label: t.label, projName: p.name, status: t.type, pk });
+    });
+  });
+  return events;
+}
+
+function renderCalendar(){
+  calYear = calYear || new Date().getFullYear();
+  calMonth = calMonth !== undefined ? calMonth : new Date().getMonth();
+  const grid = $('cal-grid');
+  const title = $('cal-title');
+  if(!grid) return;
+
+  title.textContent = `${calYear}년 ${calMonth+1}월`;
+
+  const days = ['일','월','화','수','목','금','토'];
+  const firstDay = new Date(calYear, calMonth, 1).getDay();
+  const lastDate = new Date(calYear, calMonth+1, 0).getDate();
+  const today = new Date();
+  const events = getAllSchedules();
+
+  grid.innerHTML = '';
+
+  // 요일 헤더
+  days.forEach((d,i)=>{
+    const h = document.createElement('div');
+    h.style.cssText=`padding:10px;text-align:center;font-size:13px;font-weight:700;color:${i===0?'#E53E3E':i===6?'#2B6CB0':'var(--g600)'};background:var(--g50);border-bottom:1px solid var(--g200);`;
+    h.textContent = d;
+    grid.appendChild(h);
+  });
+
+  // 빈 칸
+  for(let i=0;i<firstDay;i++){
+    const blank = document.createElement('div');
+    blank.style.cssText='min-height:90px;border-right:1px solid var(--g100);border-bottom:1px solid var(--g100);background:var(--g50);';
+    grid.appendChild(blank);
+  }
+
+  // 날짜 칸
+  for(let d=1;d<=lastDate;d++){
+    const isToday = (d===today.getDate() && calMonth===today.getMonth() && calYear===today.getFullYear());
+    const dow = (firstDay+d-1)%7;
+    const cell = document.createElement('div');
+    cell.style.cssText=`min-height:90px;padding:6px;border-right:1px solid var(--g100);border-bottom:1px solid var(--g100);vertical-align:top;background:${isToday?'#EEF3FF':'#fff'};`;
+
+    const dateSpan = document.createElement('div');
+    dateSpan.style.cssText=`font-size:13px;font-weight:${isToday?'700':'500'};color:${isToday?'var(--primary)':dow===0?'#E53E3E':dow===6?'#2B6CB0':'var(--g700)'};width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;${isToday?'background:var(--primary);color:#fff;':''}margin-bottom:4px;`;
+    dateSpan.textContent = d;
+    cell.appendChild(dateSpan);
+
+    // 이날 이벤트
+    const dayEvents = events.filter(e => e.date.getDate()===d && e.date.getMonth()===calMonth && e.date.getFullYear()===calYear);
+    dayEvents.forEach(e=>{
+      const ev = document.createElement('div');
+      const colors = {done:'#1A7A4A', active:'#1B3F8B', pending:'#6C757D'};
+      ev.style.cssText=`font-size:11px;font-weight:600;padding:2px 6px;border-radius:4px;margin-bottom:2px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:${colors[e.status]||'#6C757D'};color:#fff;`;
+      ev.title = `${e.projName} - ${e.label}`;
+      ev.textContent = e.label;
+      ev.onclick = (evt)=>{ evt.stopPropagation(); goToDetail(e.pk); };
+      cell.appendChild(ev);
+    });
+
+    grid.appendChild(cell);
+  }
+}
+
+window.calPrev = function(){ calMonth--; if(calMonth<0){calMonth=11;calYear--;} renderCalendar(); };
+window.calNext = function(){ calMonth++; if(calMonth>11){calMonth=0;calYear++;} renderCalendar(); };
+window.calToday = function(){ calYear=new Date().getFullYear(); calMonth=new Date().getMonth(); renderCalendar(); };
+
+// ── 다가오는 일정 (대시보드) ──
+function renderDashSchedule(){
+  const con = $('dash-schedule-list');
+  if(!con) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  const events = getAllSchedules()
+    .filter(e => e.date >= today)
+    .sort((a,b)=>a.date-b.date)
+    .slice(0,4);
+
+  if(!events.length){
+    con.innerHTML='<div style="font-size:12px;color:var(--g400);text-align:center;padding:8px 0;">다가오는 일정이 없습니다.</div>';
+    return;
+  }
+  con.innerHTML = events.map(e=>{
+    const diff = Math.round((e.date-today)/(1000*60*60*24));
+    const dStr = diff===0?'오늘':`D-${diff}`;
+    return`<div class="sched-item" onclick="goToDetail('${e.pk}')" style="cursor:pointer;">
+      <div class="sched-date">${e.date.getFullYear()}.${String(e.date.getMonth()+1).padStart(2,'0')}.${String(e.date.getDate()).padStart(2,'0')}</div>
+      <div class="sched-name">${e.projName} · ${e.label}</div>
+      <div class="sched-d">${dStr}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── 설계변경 저장 버그 수정 ──
+function dcSave(){dcEm=false;$('btn-dc-e').style.display='';$('btn-dc-s').style.display='none';$('btn-dc-c').style.display='none';$('btn-dc-a').style.display='none';window.saveAppData&&window.saveAppData();renderDc();}
+function dcCancel(){dcRows=dcBk;dcEm=false;$('btn-dc-e').style.display='';$('btn-dc-s').style.display='none';$('btn-dc-c').style.display='none';$('btn-dc-a').style.display='none';renderDc();}
 const DC_F=['접수일영업','접수일연구소','NK','수요처','영업자','품명','규격','범주','도면배포일','신규도면번호','설계자'];
 function renderDc(){
   const tb=$('dc-body');tb.innerHTML='';
@@ -1730,8 +1864,8 @@ function renderDc(){
   $('dc-tbl').className='dc-tbl'+(dcEm?' em':'');
 }
 // dcEdit → Firebase module script에서 관리자 권한 포함하여 정의됨
-function dcSave(){dcEm=false;$('btn-dc-e').style.display='';$('btn-dc-s').style.display='none';$('btn-dc-c').style.display='none';$('btn-dc-a').style.display='none';saveAppData();renderDc();}
-function dcCancel(){dcRows=dcBk;dcEm=false;$('btn-dc-e').style.display='';$('btn-dc-s').style.display='none';$('btn-dc-c').style.display='none';$('btn-dc-a').style.display='none';renderDc();}
+function dcSave2(){} // 하단 dcSave로 대체됨
+function dcCancel2(){} // 하단 dcCancel로 대체됨
 function dcAdd(){dcRows.push({접수일영업:'',접수일연구소:'',NK:'',수요처:'',영업자:'',품명:'',규격:'',범주:'',도면배포일:'',신규도면번호:'',설계자:'',진행상황:'제작중',메모:''});renderDc();}
 function dcDel(i){if(confirm('이 행을 삭제하시겠습니까?')){dcRows.splice(i,1);renderDc();}}
 
