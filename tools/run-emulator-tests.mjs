@@ -1,0 +1,13 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {spawn} from 'node:child_process';
+import {fileURLToPath} from 'node:url';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const runtime=path.join(root,'.test-runtime');
+const localJava=fs.existsSync(runtime)?fs.readdirSync(runtime).filter(n=>n.startsWith('jdk-')).map(n=>path.join(runtime,n,'bin')).find(p=>fs.existsSync(path.join(p,'java.exe'))):null;
+const env={...process.env,FIREBASE_EMULATORS_PATH:path.join(runtime,'emulators'),FIREBASE_CLI_DISABLE_UPDATE_CHECK:'true'};
+const pathKey=Object.keys(env).find(key=>key.toLowerCase()==='path')||'PATH';
+env[pathKey]=[localJava,path.dirname(process.execPath),env[pathKey]].filter(Boolean).join(path.delimiter);
+const testCommand='"'+process.execPath+'" --test tests/*.test.mjs';
+const child=spawn(process.execPath,[path.join(root,'node_modules/firebase-tools/lib/bin/firebase.js'),'emulators:exec','--only','firestore','--project','demo-koas-security',testCommand],{cwd:root,env,stdio:'inherit'});
+child.on('exit',code=>process.exitCode=code??1);

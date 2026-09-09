@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function admin() { return signedIn() && request.auth.token.get('admin', false) == true; }
+    function approved() {
+      return admin() || (signedIn() &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'approved');
+    }
+    function validWorkspace() {
+      let d = request.resource.data;
+      return d.keys().hasAll(['PROJ','GRP','BOARD','dcRows','dccRows','boardId','completedProjects','revision','protocolVersion','updatedBy','updatedAt']) &&
+        d.keys().hasOnly(['PROJ','GRP','BOARD','dcRows','dccRows','boardId','completedProjects','revision','protocolVersion','updatedBy','updatedAt']) &&
+        d.PROJ is map && d.GRP is map && d.BOARD is map &&
+        d.dcRows is list && d.dccRows is list && d.completedProjects is list &&
+        d.boardId is int && d.boardId >= 0 && d.revision is int &&
+        d.protocolVersion == 2 && d.updatedBy == request.auth.uid && d.updatedAt == request.time;
+    }
+    match /appData/main {
+      allow read: if approved();
+      allow create: if admin() && validWorkspace() && request.resource.data.revision == 1;
+      allow update: if approved() && validWorkspace() &&
+        request.resource.data.revision == resource.data.get('revision', 0) + 1;
+      allow delete: if false;
+    }
+    match /users/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || admin() || (approved() && resource.data.status == 'approved'));
+      allow list: if admin() || (approved() && resource.data.status == 'approved');
+      allow create: if signedIn() && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['uid','name','email','role','status','createdAt']) &&
+        request.resource.data.uid == uid && request.resource.data.email == request.auth.token.email &&
+        request.resource.data.name is string && request.resource.data.name.size() > 0 && request.resource.data.name.size() <= 100 &&
+        request.resource.data.role == 'member' && request.resource.data.status == 'pending' &&
+        request.resource.data.createdAt == request.time;
+      allow update: if admin() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        request.resource.data.status in ['approved','pending','rejected'];
+      allow delete: if admin() && uid != request.auth.uid && resource.data.role != 'admin';
+    }
+    match /{document=**} { allow read, write: if false; }
+  }
+}

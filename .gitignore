@@ -1,0 +1,9 @@
+backups/
+inspection/
+__pycache__/
+node_modules/
+.npm-cache/
+firebase-debug.log
+.test-runtime/
+firestore-debug.log
+ui-debug.log
